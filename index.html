@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Hadík</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<script src="js/snake.js"></script>
+		<script src="js/food.js"></script>
+		<script src="js/shortener.js"></script>
+		<script src="js/portal.js"></script>
+		<script src="js/foodBomb.js"></script>
+		<script src="js/wallLoop.js"></script>
+		<script src="js/scene.js"></script>
+		<script>
+			window.onload = function() {
+				scene.initialize();
+			};
+		</script>
+		<style>
+			body { text-align: center; }
+			canvas { border: 3px solid black; }
+			#score { font-size: 80px; position: absolute; right: 20px; top: 10px; }
+			#timer { font-size: 40px; position: absolute; right: 20px; top: 100px; display: none; }
+		</style>
+	</head>
+	<body>
+		<div id="canvas"></div>
+		<div id="score">0</div>
+		<div id="timer">0</div>
+	</body>
+</html>
