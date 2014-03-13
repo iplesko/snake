@@ -1,10 +1,9 @@
 var portalHelper = {countInScene: 0, lifeLength: 0};
 
-var Portal = function() {
+var Portal = function(scene) {
 	var ttl = 90 * 1000;
 
 	var x1, y1, x2, y2;
-	var scene;
 
 	this.getCoords = function() {
 		return [{x: x1, y: y1}, {x: x2, y: y2}];
@@ -27,8 +26,7 @@ var Portal = function() {
 		context.fill();
 	};
 
-	this.activate = function(_scene) {
-		scene = _scene;
+	this.activate = function() {
 		portalHelper.lifeLength += scene.getDt();
 		if (portalHelper.countInScene >= 1 || Math.random() > 1 / (scene.getGridSize().blockCount / 8)) {
 			return false;

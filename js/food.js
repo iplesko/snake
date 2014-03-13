@@ -1,9 +1,8 @@
 var foodHelper = {countInScene: 0};
 
-var Food = function() {
+var Food = function(scene) {
 
 	var color;
-	var scene;
 	var eaten = false;
 
 	var x, y;
@@ -27,8 +26,7 @@ var Food = function() {
 		context.stroke();
 	};
 
-	this.activate = function(_scene, ignoreCountInScene) {
-		scene = _scene;
+	this.activate = function(ignoreCountInScene) {
 		if (!ignoreCountInScene && foodHelper.countInScene >= 1) {
 			return false;
 		}

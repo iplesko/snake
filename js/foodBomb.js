@@ -1,8 +1,7 @@
 var foodBombHelper = {countInScene: 0, lifeLength: 0};
 
-var FoodBomb = function() {
+var FoodBomb = function(scene) {
 
-	var scene;
 	var eaten = false;
 
 	var x, y;
@@ -24,8 +23,7 @@ var FoodBomb = function() {
 		context.fill();
 	};
 
-	this.activate = function(_scene) {
-		scene = _scene;
+	this.activate = function() {
 		foodBombHelper.lifeLength += scene.getDt();
 		if (foodBombHelper.countInScene >= 1 || Math.random() > 1 / (scene.getGridSize().blockCount / 4)) {
 			return false;
@@ -45,8 +43,8 @@ var FoodBomb = function() {
 		var snakeCoords = scene.getSnake().getCoords();
 		if (x === snakeCoords.x && y === snakeCoords.y) {
 			for (var i = 0; i < 10; i++) {
-				var item = new Food();
-				item.activate(scene, true);
+				var item = new Food(scene);
+				item.activate(true);
 				scene.addItem(item);
 			}
 			eaten = true;

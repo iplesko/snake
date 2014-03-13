@@ -1,4 +1,4 @@
-function Snake() {
+function Snake(scene) {
 
 	var keyBuffer = new Array();
 
@@ -14,8 +14,6 @@ function Snake() {
 	var history = [{x: -1, y: 0}];
 	var colors = [];
 
-	var scene;
-
 	var randomColor = function() {
 		var g = Math.round(Math.random() * 255);
 		var b = Math.round(Math.random() * 255);
@@ -25,6 +23,11 @@ function Snake() {
 
 	this.draw = function() {
 
+		dt += scene.getDt();
+		if (dt > scene.getSpeed()) {
+			dt = 0;
+		}
+		
 		var context = scene.getContext();
 		if (history.length > colors.length) {
 			colors.unshift(randomColor());
@@ -33,6 +36,9 @@ function Snake() {
 		var blockSize = scene.getBlockSize();
 		var dx, dy;
 		var speed = scene.getSpeed();
+		var dtSpeed = dt / speed;
+		var dsXI = 0, dsXO = 0, dsWI = 1, dsWO = 1;
+		var dsYI = 0, dsYO = 0, dsHI = 1, dsHO = 1;
 
 		var i;
 		for (i in history) {
@@ -52,31 +58,81 @@ function Snake() {
 
 					switch (history[i].direction) {
 						case 'u' :
-							ddy = -1;
-							break;
-						case 'r' :
-							ddx = +1;
+							dsYO = (1 - dtSpeed);
+							dsHO = dtSpeed;
+							dsHI = (1 - dtSpeed);
+							//~ context.rect(
+									//~ (history[i - 1].x) * blockSize.width,
+									//~ (history[i - 1].y) * blockSize.height,
+									//~ blockSize.width, blockSize.height * (1 - dtSpeed));
+							//~ context.rect(
+									//~ (history[i].x) * blockSize.width,
+									//~ (history[i].y + (1 - dtSpeed)) * blockSize.height,
+									//~ blockSize.width, blockSize.height * dtSpeed);
 							break;
 						case 'd' :
-							ddy = 1;
+							dsYI = dtSpeed;
+							dsHO = dtSpeed;
+							dsHI = (1 - dtSpeed);
+							//~ context.rect(
+									//~ (history[i - 1].x) * blockSize.width,
+									//~ (history[i - 1].y + dtSpeed) * blockSize.height,
+									//~ blockSize.width, blockSize.height * (1 - dtSpeed));
+							//~ context.rect(
+									//~ (history[i].x) * blockSize.width,
+									//~ (history[i].y) * blockSize.height,
+									//~ blockSize.width, blockSize.height * dtSpeed);
+							break;
+						case 'r' :
+							dsXI = dtSpeed;
+							dsWO = dtSpeed;
+							dsWI = (1 - dtSpeed);
+							//~ context.rect(
+									//~ (history[i - 1].x + dtSpeed) * blockSize.width,
+									//~ (history[i - 1].y) * blockSize.height,
+									//~ blockSize.width * (1 - dtSpeed), blockSize.height);
+							//~ context.rect(
+									//~ (history[i].x) * blockSize.width,
+									//~ (history[i].y) * blockSize.height,
+									//~ blockSize.width * dtSpeed, blockSize.height);
 							break;
 						case 'l' :
-							ddx = -1;
+							dsXO = (1 - dtSpeed);
+							dsWO = dtSpeed;
+							dsWI = (1 - dtSpeed);
+							//~ context.rect(
+									//~ (history[i - 1].x) * blockSize.width,
+									//~ (history[i - 1].y) * blockSize.height,
+									//~ blockSize.width * (1 - dtSpeed), blockSize.height);
+							//~ context.rect(
+									//~ (history[i].x + (1 - dtSpeed)) * blockSize.width,
+									//~ (history[i].y) * blockSize.height,
+									//~ blockSize.width * dtSpeed, blockSize.height);
 							break;
 					}
+					//input
+					context.rect(
+							(history[i - 1].x + dsXI) * blockSize.width,
+							(history[i - 1].y + dsYI) * blockSize.height,
+							blockSize.width * dsWI, blockSize.height * dsHI);
+					//output
+					context.rect(
+							(history[i].x + dsXO) * blockSize.width,
+							(history[i].y + dsYO) * blockSize.height,
+							blockSize.width * dsWO, blockSize.height * dsHO);
 
-					context.rect(
-							(history[i].x - ddx + (ddx * dt / speed)) * blockSize.width,
-							(history[i].y - ddy + (ddy * dt / speed)) * blockSize.height,
-							blockSize.width, blockSize.height);
-					context.rect(
-							(history[i - 1].x + (ddx * dt / speed)) * blockSize.width,
-							(history[i - 1].y + (ddy * dt / speed)) * blockSize.height,
-							blockSize.width, blockSize.height);
+					//~ context.rect(
+							//~ (history[i].x - ddx + (ddx * dt / speed)) * blockSize.width,
+							//~ (history[i].y - ddy + (ddy * dt / speed)) * blockSize.height,
+							//~ blockSize.width, blockSize.height);
+					//~ context.rect(
+							//~ (history[i - 1].x + (ddx * dt / speed)) * blockSize.width,
+							//~ (history[i - 1].y + (ddy * dt / speed)) * blockSize.height,
+							//~ blockSize.width, blockSize.height);
 				} else {
 					context.rect(
-							(history[i - 1].x + ((history[i].x - history[i - 1].x) * dt / speed)) * blockSize.width,
-							(history[i - 1].y + ((history[i].y - history[i - 1].y) * dt / speed)) * blockSize.height,
+							(history[i - 1].x + ((history[i].x - history[i - 1].x) * dtSpeed)) * blockSize.width,
+							(history[i - 1].y + ((history[i].y - history[i - 1].y) * dtSpeed)) * blockSize.height,
 							blockSize.width, blockSize.height);
 				}
 
@@ -86,14 +142,8 @@ function Snake() {
 		}
 
 	};
-
-	this.move = function(_dt) {
-
-		dt += _dt;
-		if (dt <= scene.getSpeed()) {
-			return;
-		}
-		dt = 0;
+	
+	this.preupdate = function() {
 		changeDirection();
 
 		switch (direction) {
@@ -110,23 +160,14 @@ function Snake() {
 				x--;
 				break;
 		}
+	}
 
+	this.move = function() {
 		var gridSize = scene.getGridSize();
-		if (scene.getLoopWalls()) {
-			if (x > gridSize.width - 1) {
-				x = 0;
-			} else if (x < 0) {
-				x = gridSize.width - 1;
-			} else if (y > gridSize.height - 1) {
-				y = 0;
-			} else if (y < 0) {
-				y = gridSize.height - 1;
-			}
-		}
-
+		
 		if (this.collision()) {
 			dt = scene.getSpeed();
-			return;
+			return false;
 		}
 
 		history.push({x: x, y: y, direction: direction});
@@ -134,7 +175,7 @@ function Snake() {
 		if (history.length > length + 1) {
 			history.shift();
 		}
-
+		return true;
 	};
 
 	this.incrementLength = function(count, color) {
@@ -170,12 +211,20 @@ function Snake() {
 
 	this.inHistory = function(coords) {
 		for (var i in history) {
+			if(i == 0) {
+				continue;
+			}
 			if (history[i].x === coords.x && history[i].y === coords.y) {
 				return true;
 			}
 		}
 		return false;
 	};
+	
+	this.getHistory = function() {
+		//TODO: remove first element
+		return history;
+	}
 
 	this.collision = function() {
 
@@ -188,6 +237,8 @@ function Snake() {
 		collision = collision || this.inHistory({x: x, y: y});
 
 		if (collision) {
+			console.debug(x, y);
+			console.debug("Collision");
 			scene.stop();
 		}
 		return collision;
@@ -246,13 +297,13 @@ function Snake() {
 
 	};
 
-	this.setScene = function(_scene) {
-		scene = _scene;
-	};
-
 	this.moveHead = function(coords) {
-		x = coords.x;
-		y = coords.y;
+		if(coords.x !== undefined) {
+			x = coords.x;
+		}
+		if(coords.y !== undefined) {
+			y = coords.y;
+		}
 	};
 
 	this.getCoords = function() {

@@ -6,17 +6,17 @@ var Scene = function() {
 	var time;
 	var score = 0;
 	var level = 1;
-	var loopWalls = false;
 	var interval = 0;
-	var speed = 120;
+	var speed = 320;
 
-	var itemTypes = [Food, Shortener, Portal, FoodBomb, WallLoop];
+	var itemTypes = [Food, Shortener, Portal, FoodBomb, WallLoop, Wall];
 	var itemPool = new Array();
 	var items = new Array();
 
 	var dt = 0;
 
 	var snake;
+	var usedBlocks = new Array();
 
 	var blockSize = {width: 20, height: 20};
 	var gridSize = {width: 50, height: 30};
@@ -36,7 +36,15 @@ var Scene = function() {
 	};
 
 	var move = function(dt) {
-		snake.move(dt);
+		snake.preupdate();
+		
+		for(var i in items) {
+			if(items[i].preupdate && items[i].preupdate()) {
+				return false;
+			}
+		}
+		
+		return snake.move(dt);
 	};
 
 	this.step = function() {
@@ -46,14 +54,18 @@ var Scene = function() {
 		interval += dt;
 		time = now;
 
-		move(dt);
-
 		if (interval > speed) {
+
+			if(!move(dt)) {
+				return false;
+			}
 			interval = 0;
 
 			var i = items.length;
 			while (i--) {
-				items[i].update();
+				if(items[i].update && items[i].update()) {
+					return false;
+				}
 				if (items[i].destroy()) {
 					items.splice(i, 1);
 				}
@@ -61,7 +73,7 @@ var Scene = function() {
 
 			for (var i in itemPool) {
 				var item = itemPool[i];
-				var canBeAdded = item.activate(this);
+				var canBeAdded = item.activate();
 				if (canBeAdded) {
 					items.push(itemPool[i]);
 				}
@@ -94,6 +106,7 @@ var Scene = function() {
 //			renewAnimationInterval();
 //		}
 
+		usedBlocks = new Array();
 	};
 
 	this.getDt = function() {
@@ -114,10 +127,9 @@ var Scene = function() {
 		context = canvas.getContext("2d");
 		scoreElement = document.getElementById('score');
 
-		snake = new Snake();
-		snake.setScene(this);
+		snake = new Snake(this);
 		for (var i in itemTypes) {
-			itemPool.push(new itemTypes[i]());
+			itemPool.push(new itemTypes[i](this));
 		}
 
 		document.onkeydown = function(event) {
@@ -175,28 +187,32 @@ var Scene = function() {
 
 	this.getEmptyPosition = function() {
 
-		var conflict, x, y;
+		var conflict = false, x, y;
 
-		// TODO: detect empty positions some smarter way
-		do {
-			conflict = false;
-			x = Math.round(Math.random() * (gridSize.width - 1));
-			y = Math.round(Math.random() * (gridSize.height - 1));
+		if(!usedBlocks.length) {
 			for (var i in items) {
 				var coords = items[i].getCoords();
 				for (var j in coords) {
-					if (coords[j].x === x && coords[j].y === y) {
-						conflict = true;
-						break;
-					}
-					if (conflict) {
-						break;
-					}
+					usedBlocks[coords[j].x * coords[j].y] = 1;
 				}
 			}
-
-			conflict = conflict || snake.inHistory({x: x, y: y});
-		} while (conflict);
+			
+			var coords = snake.getHistory();
+			for (var j in coords) {
+				usedBlocks[coords[j].x * coords[j].y] = 1;
+			}
+		}
+		
+		x = Math.round(Math.random() * (gridSize.width - 1));
+		y = Math.round(Math.random() * (gridSize.height - 1));
+		while(usedBlocks[x*y] === 1 || snake.inHistory({x: x, y: y})) {
+			x++
+			if(x >= gridSize.width) {
+				x = 0;
+				y = (y + 1) % gridSize.height;
+			}
+			console.debug(x,y);
+		};
 
 		return {x: x, y: y};
 	};
@@ -211,14 +227,6 @@ var Scene = function() {
 
 	this.getGridSize = function() {
 		return gridSize;
-	};
-
-	this.getLoopWalls = function() {
-		return loopWalls;
-	};
-
-	this.setLoopWalls = function(_loopWalls) {
-		loopWalls = _loopWalls;
 	};
 
 	this.setSceneBorderColor = function(color) {

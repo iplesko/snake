@@ -1,12 +1,11 @@
 var shortenerHelper = {countInScene: 0, lifeLength: 0};
 
-var Shortener = function() {
+var Shortener = function(scene) {
 
 	var used = false;
 	var ttl = 10 * 1000;
 
 	var x, y;
-	var scene;
 
 	this.getCoords = function() {
 		return [{x: x, y: y}];
@@ -23,8 +22,7 @@ var Shortener = function() {
 		shortenerHelper.lifeLength++;
 	};
 
-	this.activate = function(_scene) {
-		scene = _scene;
+	this.activate = function() {
 		shortenerHelper.lifeLength += scene.getDt();
 		if (shortenerHelper.countInScene >= 1 || Math.random() > 1 / (scene.getGridSize().blockCount / 2)) {
 			return false;
