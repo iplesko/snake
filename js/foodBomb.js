@@ -24,7 +24,6 @@ var FoodBomb = function(scene) {
 	};
 
 	this.activate = function() {
-		foodBombHelper.lifeLength += scene.getDt();
 		if (foodBombHelper.countInScene >= 1 || Math.random() > 1 / (scene.getGridSize().blockCount / 4)) {
 			return false;
 		}
@@ -37,6 +36,10 @@ var FoodBomb = function(scene) {
 		y = coords.y;
 
 		return true;
+	};
+
+	this.notify = function() {
+		foodBombHelper.lifeLength += scene.getDt();
 	};
 
 	this.update = function() {

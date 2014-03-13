@@ -10,7 +10,7 @@ var WallLoop = function(scene) {
 	var duration = 20; //in seconds
 
 	var counter, timerElement, timer;
-	
+
 	var dt = 0;
 
 	this.getCoords = function() {
@@ -18,7 +18,7 @@ var WallLoop = function(scene) {
 	};
 
 	this.draw = function() {
-		if(!eaten) {
+		if (!eaten) {
 			var context = scene.getContext();
 			var blockSize = scene.getBlockSize();
 
@@ -30,7 +30,7 @@ var WallLoop = function(scene) {
 			context.fill();
 		} else {
 			dt += scene.getDt();
-			if(counter <= 5) {
+			if (counter <= 5) {
 				var color = Math.round((dt / 3) % 256);
 				scene.setSceneBorderColor("rgb(" + color + ",0," + color + ")");
 			}
@@ -38,7 +38,6 @@ var WallLoop = function(scene) {
 	};
 
 	this.activate = function() {
-		wallLoopHelper.lifeLength += scene.getDt();
 		if (wallLoopHelper.active || wallLoopHelper.countInScene >= 1 || Math.random() > 1 / (scene.getGridSize().blockCount / 4)) {
 			return false;
 		}
@@ -54,11 +53,15 @@ var WallLoop = function(scene) {
 		return true;
 	};
 
+	this.notify = function() {
+		wallLoopHelper.lifeLength += scene.getDt();
+	};
+
 	this.preupdate = function() {
 		var snake = scene.getSnake();
 		var snakeCoords = snake.getCoords();
 		var gridSize = scene.getGridSize();
-		if(loopActive) {
+		if (loopActive) {
 			if (snakeCoords.x > gridSize.width - 1) {
 				snake.moveHead({x: 0});
 			} else if (snakeCoords.x < 0) {
@@ -95,7 +98,7 @@ var WallLoop = function(scene) {
 		if (lifeEnded) {
 			wallLoopHelper.countInScene--;
 		}
-		return lifeEnded;
+		return !wallLoopHelper.active && lifeEnded;
 	};
 
 

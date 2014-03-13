@@ -7,9 +7,9 @@ var Scene = function() {
 	var score = 0;
 	var level = 1;
 	var interval = 0;
-	var speed = 320;
+	var speed = 120;
 
-	var itemTypes = [Food, Shortener, Portal, FoodBomb, WallLoop, Wall];
+	var itemTypes = [Food, Shortener, Portal, FoodBomb, WallLoop];
 	var itemPool = new Array();
 	var items = new Array();
 
@@ -53,6 +53,12 @@ var Scene = function() {
 		dt = (now - time);
 		interval += dt;
 		time = now;
+
+		for(var i in items) {
+			if(items[i].notify) {
+				items[i].notify();
+			}
+		}
 
 		if (interval > speed) {
 

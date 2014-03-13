@@ -23,7 +23,6 @@ var Shortener = function(scene) {
 	};
 
 	this.activate = function() {
-		shortenerHelper.lifeLength += scene.getDt();
 		if (shortenerHelper.countInScene >= 1 || Math.random() > 1 / (scene.getGridSize().blockCount / 2)) {
 			return false;
 		}
@@ -46,6 +45,10 @@ var Shortener = function(scene) {
 			used = true;
 			shortenerHelper.countInScene--;
 		}
+	};
+
+	this.notify = function() {
+		shortenerHelper.lifeLength += scene.getDt();
 	};
 
 	this.destroy = function() {

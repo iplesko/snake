@@ -27,7 +27,6 @@ var Portal = function(scene) {
 	};
 
 	this.activate = function() {
-		portalHelper.lifeLength += scene.getDt();
 		if (portalHelper.countInScene >= 1 || Math.random() > 1 / (scene.getGridSize().blockCount / 8)) {
 			return false;
 		}
@@ -54,6 +53,10 @@ var Portal = function(scene) {
 		} else if (x2 === snakeCoords.x && y2 === snakeCoords.y) {
 			snake.moveHead({x: x1, y: y1});
 		}
+	};
+
+	this.notify = function() {
+		portalHelper.lifeLength += scene.getDt();
 	};
 
 	this.destroy = function() {
