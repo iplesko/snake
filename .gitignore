@@ -1,1 +1,6 @@
+# NetBeans
 /nbproject/
+
+# IntelliJ IDEA
+*.iml
+.idea/
